@@ -1,68 +1,81 @@
-# author: Adam Romano
+# library imports
+import random
+import pygame
 
-import pygame, random
-import properties
+# global variables
+N = int(input("What value of N would you like to use for this grid (5,7,9,11)??\n"))
+CELL_SIZE = 50
+WIDTH = CELL_SIZE*N
+HEIGHT = CELL_SIZE*N
 
+
+# colors that will be used in the GUI
+WHITE = (255, 255, 255)
+BLACK = (40, 40, 40)
+
+# grid object that will be used to create GUI
 class Grid:
-
-    def generate_move(self, x, y):
-        minimum = 1
-        maximum = max([properties.N_VALUE-1-x, x, properties.N_VALUE-1-y, y])
-        if x == properties.N_VALUE//2 and y == properties.N_VALUE//2:
-            return random.randint(minimum, properties.N_VALUE//2)
-        elif x == properties.N_VALUE-1 and y == properties.N_VALUE-1:
-            return 0
-        else:
-            return random.randint(minimum, maximum)
-
     def __init__(self):
-        self.grid_width = properties.WINDOW_WIDTH
-        self.grid_height = properties.WINDOW_HEIGHT
+        self.rows = N
+        self.cols = N
         self.cells = []
 
-        for x in range(properties.N_VALUE):
-            row = []
-            for y in range(properties.N_VALUE):
-                row.append(self.generate_move(x,y))
-            self.cells.append(row)
-            row = []
+        # generate grid according to part 2 in the assignment details
+        for r in range(self.rows):
+            arr = []
+            for c in range(self.cols):
+                minimum_move = 1
+                maximum_move = max(self.rows-1-r, r, self.cols-1-c, c)
+                # if its the middle cell, bounds are (1, N//2)
+                if r == self.rows//2 and c == self.cols//2:
+                    arr.append(random.randint(minimum_move, N//2))
+                #if its the last cell, value should be 0
+                elif r == self.rows-1 and c == self.cols-1:
+                    arr.append(0)
+                else:
+                    # generate random int in (min, max)
+                    arr.append(random.randint(minimum_move, maximum_move))
+            #add the array to cells
+            self.cells.append(arr)
+            arr = []
 
-def draw_grid():
-    for x in range(0,properties.WINDOW_WIDTH, properties.CELL_WIDTH):
-        for y in range(0,properties.WINDOW_HEIGHT, properties.CELL_HEIGHT):
-            pygame.draw.rect(surface, properties.BLACK, (x,y,properties.CELL_WIDTH, properties.CELL_HEIGHT), 1)
+def draw_grid(grid, window):
+    # calculate dimensions of the cell based off window width, height and N value
+    cell_width = int(round(WIDTH / N))
+    cell_height = int(round(HEIGHT / N))
 
-def populate_grid(grid):
-    for x in range(properties.N_VALUE):
-        for y in range(properties.N_VALUE):
-            val = grid.cells[x][y]
-            text = font.render(str(val), False, properties.BLACK)
+    # draw the grid itself
+    for x in range(0, WIDTH, cell_width):
+        pygame.draw.line(window, WHITE, (x, 0), (x, HEIGHT))
+    for y in range(0, HEIGHT, cell_height):
+        pygame.draw.line(window, WHITE, (0, y), (WIDTH, y))
+
+    #add the numbers
+    font = pygame.font.SysFont('marvel', 40)
+    for r in range(grid.rows):
+        for c in range(grid.cols):
+            move = grid.cells[r][c]
+            text = font.render(str(move), False, WHITE)
             text_width = text.get_width()
             text_height = text.get_height()
-            surface.blit(text, (y*(properties.CELL_HEIGHT)+(properties.CELL_WIDTH-text_width)//2, x*(properties.CELL_WIDTH)+(properties.CELL_HEIGHT-text_height)//2))
+            window.blit(text, (c*(CELL_SIZE)+(CELL_SIZE-text_width)//2, r*(CELL_SIZE)+(CELL_SIZE-text_height)//2))
 
-if __name__ == '__main__':
-    grid = Grid()
-    print(grid.cells)
+def main():
+    #initialize a pygame
     pygame.init()
-    surface = pygame.display.set_mode((properties.WINDOW_WIDTH, properties.WINDOW_HEIGHT))
-    pygame.display.set_caption('grid')
-    surface.fill(properties.WHITE)
-    font = pygame.font.SysFont('arial', 40)
-    draw_grid()
-    populate_grid(grid)
+    window = pygame.display.set_mode((WIDTH, HEIGHT))
+    grid = Grid()
 
-    while True:
+    #running loop
+    running = True
+    while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
+                running = False
+        pygame.display.set_caption("AI Project 1 - Oliver Gilan and Adam Romano")
+        window.fill(BLACK)
+        draw_grid(grid, window)
         pygame.display.update()
 
-
-
-
-
-
-
-
-
+if __name__ == '__main__':
+    main()
