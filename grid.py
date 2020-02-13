@@ -1,17 +1,11 @@
 # library imports
 import random
-import pygame
+import time
+from termcolor import colored
+
 
 # global variables
 N = int(input("What value of N would you like to use for this grid (5,7,9,11)??\n"))
-CELL_SIZE = 50
-WIDTH = CELL_SIZE*N
-HEIGHT = CELL_SIZE*N
-
-
-# colors that will be used in the GUI
-WHITE = (255, 255, 255)
-BLACK = (40, 40, 40)
 
 # grid object that will be used to create GUI
 class Grid:
@@ -39,43 +33,25 @@ class Grid:
             self.cells.append(arr)
             arr = []
 
-def draw_grid(grid, window):
-    # calculate dimensions of the cell based off window width, height and N value
-    cell_width = int(round(WIDTH / N))
-    cell_height = int(round(HEIGHT / N))
+def print_grid(position,grid, visited):
+    for i in range(len(grid)):
+        for j in range(len(grid[0])):
+            if i == position[0] and j == position[1]:
+                print(colored("{:2.0f}".format(grid[i][j]), 'red'), end=" ")
+                visited.append((i,j))
+            elif (i,j) in visited:
+                print(colored("{:2.0f}".format(grid[i][j]), 'blue'), end=" ")
+            else:
+                print("{:2.0f}".format(grid[i][j]), end=" ")
+        print()
 
-    # draw the grid itself
-    for x in range(0, WIDTH, cell_width):
-        pygame.draw.line(window, WHITE, (x, 0), (x, HEIGHT))
-    for y in range(0, HEIGHT, cell_height):
-        pygame.draw.line(window, WHITE, (0, y), (WIDTH, y))
-
-    #add the numbers
-    font = pygame.font.SysFont('marvel', 40)
-    for r in range(grid.rows):
-        for c in range(grid.cols):
-            move = grid.cells[r][c]
-            text = font.render(str(move), False, WHITE)
-            text_width = text.get_width()
-            text_height = text.get_height()
-            window.blit(text, (c*(CELL_SIZE)+(CELL_SIZE-text_width)//2, r*(CELL_SIZE)+(CELL_SIZE-text_height)//2))
-
-def main():
-    #initialize a pygame
-    pygame.init()
-    window = pygame.display.set_mode((WIDTH, HEIGHT))
-    grid = Grid()
-
-    #running loop
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-        pygame.display.set_caption("AI Project 1 - Oliver Gilan and Adam Romano")
-        window.fill(BLACK)
-        draw_grid(grid, window)
-        pygame.display.update()
+def run_loop(grid, visited=[]):
+    # path = [(0, 0), (1, 0), (1, 1), (0, 1), (0, 2), (1, 2), (2, 2)]
+    for tup in path:
+        print_grid(tup, grid, visited)
+        time.sleep(1)
+        print('=========')
 
 if __name__ == '__main__':
-    main()
+    grid = Grid()
+    run_loop(grid.cells)
