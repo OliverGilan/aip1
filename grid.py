@@ -2,6 +2,7 @@
 import random
 import time
 from termcolor import colored
+from copy import deepcopy
 
 
 # global variables
@@ -13,7 +14,6 @@ class Grid:
         self.rows = N
         self.cols = N
         self.cells = []
-
         # generate grid according to part 2 in the assignment details
         for r in range(self.rows):
             arr = []
@@ -32,6 +32,51 @@ class Grid:
             #add the array to cells
             self.cells.append(arr)
             arr = []
+
+    # will return a k value based on how hard the grid is to solve
+    def evalulate(self):
+        visited = deepcopy(self.cells)
+        depths = deepcopy(self.cells)
+
+        queue = [(0,0,0)]
+        while len(queue) != 0:
+            coordinate = queue.pop(0)
+            x = coordinate[0]
+            y = coordinate[1]
+            depth = coordinate[2]
+
+            if visited[x][y] == -1:
+                continue
+
+            visited[x][y] = -1
+            depths[x][y] = depth
+
+            jump = self.cells[x][y]
+            if jump == 0:
+                break
+
+            if x+jump < len(self.cells):
+                queue.append((x+jump, y, depth+1))
+            if x-jump >= 0:
+                queue.append((x-jump, y, depth+1))
+            if y+jump < len(self.cells):
+                queue.append((x, y+jump, depth+1))
+            if y-jump >= 0:
+                queue.append((x, y-jump, depth+1))
+
+        reachable = True if visited[len(self.cells)-1][len(self.cells)-1] == -1 else False
+
+        k = 0
+        if reachable is False:
+            for x in range(len(visited)):
+                for y in range(len(visited[0])):
+                    if visited[x][y] != -1:
+                        k = k-1
+            return k
+        else:
+            return depths[len(self.cells)-1][len(self.cells)-1]
+
+
 
 def print_grid(position,grid, visited):
     for i in range(len(grid)):
@@ -53,5 +98,9 @@ def run_loop(grid, visited=[]):
         print('=========')
 
 if __name__ == '__main__':
-    grid = Grid()
-    run_loop(grid.cells)
+    scores = []
+    for i in range(100):
+        grid = Grid()
+        scores.append(grid.evalulate())
+    print(scores)
+
